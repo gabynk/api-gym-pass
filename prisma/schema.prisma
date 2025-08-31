@@ -23,7 +23,9 @@ model User {
   role          Role     @default(MEMBER)
   created_at    DateTime @default(now())
 
-  checkIns CheckIn[]
+  checkIns             CheckIn[]
+  refreshTokens        UserRefreshToken[] @relation("UserRefreshTokens")
+  revokedRefreshTokens UserRefreshToken[] @relation("RefreshRevoker")
 
   @@map("users")
 }
@@ -50,7 +52,23 @@ model Gym {
   latitude    Decimal
   longitude   Decimal
 
-  CheckIn CheckIn[]
+  checkIns CheckIn[]
 
   @@map("gyms")
+}
+
+model UserRefreshToken {
+  id         String    @id @default(uuid())
+  token_hash String
+  expires_at DateTime
+  revoked_at DateTime?
+  created_at DateTime  @default(now())
+
+  user    User   @relation("UserRefreshTokens", fields: [user_id], references: [id])
+  user_id String
+
+  revokedBy     User?   @relation("RefreshRevoker", fields: [revoked_by_id], references: [id])
+  revoked_by_id String?
+
+  @@map("user_refresh_token")
 }
