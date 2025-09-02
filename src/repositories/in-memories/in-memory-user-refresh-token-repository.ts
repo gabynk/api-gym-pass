@@ -22,13 +22,28 @@ export class InMemoryUserRefreshTokenRepository implements UserRefreshTokenRepos
   }
 
   async getByUserId(userId: string) {
-    const token = this.items.filter((item) => {
+    return this.items.filter((item) => {
       return item.user_id === userId
         && item.expires_at > new Date()
         && item.revoked_by_id === null
         && item.revoked_at === null
     })
+  }
 
-    return token
+  async revokingByUserId(revokingUserId: string, revokedById: string) {
+    const tokens = this.items.map((item) => {
+      if (item.user_id === revokingUserId) {
+        return {
+          ...item,
+          revoked_at: new Date(),
+          revoked_by_id: revokedById
+        }
+      }
+      return item
+    })
+
+    this.items = tokens
+
+    return tokens.filter(item => item.user_id === revokingUserId)
   }
 }
