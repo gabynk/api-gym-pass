@@ -10,4 +10,17 @@ export class PrismaUserRefreshTokenRepository implements UserRefreshTokenReposit
 
     return token
   }
+
+  async getByUserId(user_id: string) {
+    const token = await prisma.userRefreshToken.findMany({
+      where: {
+        user_id,
+        expires_at: {
+          gte: new Date()
+        }
+      }
+    })
+
+    return token
+  }
 }
