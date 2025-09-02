@@ -1,5 +1,6 @@
 import { InvalidCredentialsError } from '@/use-cases/errors/invalid-credentials-error'
 import { MakeAuthenticateUseCase } from '@/use-cases/factories/make-authenticate-use-case'
+import { MakeCreateTokensUseCase } from '@/use-cases/factories/make-create-tokens-use-case'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
@@ -22,24 +23,28 @@ export async function authenticate(
       password,
     })
 
-    const token = await reply.jwtSign(
-      {},
-      {
-        sign: {
-          sub: user.id,
-        },
+    const token = await reply.jwtSign({}, {
+      sign: {
+        sub: user.id,
+        expiresIn: '10m',
       },
+    },
     )
 
-    const refreshToken = await reply.jwtSign(
-      {},
-      {
-        sign: {
-          sub: user.id,
-          expiresIn: '7d',
-        },
+    const refreshToken = await reply.jwtSign({}, {
+      sign: {
+        sub: user.id,
+        expiresIn: '7d',
       },
+    },
     )
+
+    const createTokenUserCase = MakeCreateTokensUseCase()
+
+    await createTokenUserCase.execute({
+      refreshToken,
+      userId: user.id,
+    })
 
     return reply
       .setCookie('refreshToken', refreshToken, {
