@@ -1,12 +1,12 @@
-import { beforeEach, describe, expect, it } from 'vitest'
-import { CreateTokensUseCase } from './create-tokens'
-import { InMemoryUserRefreshTokenRepository } from '@/repositories/in-memories/in-memory-user-refresh-token-repository'
-import { UnauthorizedError } from './errors/unauthorized-error'
-import { RevokeTokensUseCase } from './revoke-tokens'
-import { InMemoryUsersRepository } from '@/repositories/in-memories/in-memory-users-repository'
-
 import { hash } from 'bcryptjs'
+import { randomUUID } from 'node:crypto'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { InMemoryUserRefreshTokenRepository } from '@/repositories/in-memories/in-memory-user-refresh-token-repository'
+import { InMemoryUsersRepository } from '@/repositories/in-memories/in-memory-users-repository'
+import { UnauthorizedError } from './errors/unauthorized-error'
 import { RegisterUseCase } from './register'
+import { CreateTokensUseCase } from './create-tokens'
+import { RevokeTokensUseCase } from './revoke-all-tokens'
 
 let userRefreshTokenRepository: InMemoryUserRefreshTokenRepository
 let userRepository: InMemoryUsersRepository
@@ -23,7 +23,7 @@ describe('Revoke Token Use Case', () => {
     sut = new RevokeTokensUseCase(userRefreshTokenRepository, userRepository)
   })
 
-  it('Should be able to revoke tokens', async () => {
+  it('Should be able to revoke other user tokens', async () => {
     const revokedByUser = await userRepository.create({
       name: 'Admim',
       email: 'admin@example.com',
@@ -39,6 +39,7 @@ describe('Revoke Token Use Case', () => {
     await createTokensUseCase.execute({
       refreshToken: 'token',
       userId: revokingByUser.id,
+      jti: randomUUID(),
     })
     const { tokens } = await sut.execute({
       actorId: revokedByUser.id,
@@ -46,6 +47,28 @@ describe('Revoke Token Use Case', () => {
     })
 
     expect(tokens[0].user_id).toEqual(revokingByUser.id)
+    expect(tokens[0].revoked_at).not.toEqual(null)
+    expect(tokens[0].revoked_by_id).toEqual(revokedByUser.id)
+  })
+
+  it('Should be able to revoke my tokens', async () => {
+    const revokedByUser = await userRepository.create({
+      name: 'Admim',
+      email: 'admin@example.com',
+      password_hash: await hash('123456', 6),
+      role: 'ADMIN',
+    })
+    await createTokensUseCase.execute({
+      refreshToken: 'token',
+      userId: revokedByUser.id,
+      jti: randomUUID(),
+    })
+    const { tokens } = await sut.execute({
+      actorId: revokedByUser.id,
+      targetUserId: revokedByUser.id
+    })
+
+    expect(tokens[0].user_id).toEqual(revokedByUser.id)
     expect(tokens[0].revoked_at).not.toEqual(null)
     expect(tokens[0].revoked_by_id).toEqual(revokedByUser.id)
   })

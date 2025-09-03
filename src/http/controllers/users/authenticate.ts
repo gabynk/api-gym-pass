@@ -1,8 +1,9 @@
+import { FastifyReply, FastifyRequest } from 'fastify'
+import { randomUUID } from 'node:crypto'
+import { z } from 'zod'
 import { InvalidCredentialsError } from '@/use-cases/errors/invalid-credentials-error'
 import { MakeAuthenticateUseCase } from '@/use-cases/factories/make-authenticate-use-case'
 import { MakeCreateTokensUseCase } from '@/use-cases/factories/make-create-tokens-use-case'
-import { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 export async function authenticate(
   request: FastifyRequest,
@@ -23,7 +24,11 @@ export async function authenticate(
       password,
     })
 
-    const token = await reply.jwtSign({}, {
+    const jti = randomUUID()
+
+    const token = await reply.jwtSign({
+      jti
+    }, {
       sign: {
         sub: user.id,
         expiresIn: '10m',
@@ -31,7 +36,9 @@ export async function authenticate(
     },
     )
 
-    const refreshToken = await reply.jwtSign({}, {
+    const refreshToken = await reply.jwtSign({
+      jti
+    }, {
       sign: {
         sub: user.id,
         expiresIn: '7d',
@@ -44,6 +51,7 @@ export async function authenticate(
     await createTokenUserCase.execute({
       refreshToken,
       userId: user.id,
+      jti,
     })
 
     return reply

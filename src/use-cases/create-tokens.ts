@@ -6,10 +6,12 @@ import { UserRefreshToken } from '@prisma/client'
 interface CreateTokensUseCaseRequest {
   refreshToken: string
   userId: string
+  jti: string
+  oldJti?: string
 }
 
 interface CreateTokensUseCaseRequestResponse {
-  tokens: UserRefreshToken
+  token: UserRefreshToken
 }
 
 export class CreateTokensUseCase {
@@ -17,19 +19,23 @@ export class CreateTokensUseCase {
 
   async execute({
     refreshToken,
-    userId
+    userId,
+    jti,
+    oldJti
   }: CreateTokensUseCaseRequest): Promise<CreateTokensUseCaseRequestResponse> {
     const token_hash = await hash(refreshToken, 6)
     const expires_at = dayjs().add(7, 'days')
 
-    const tokens = await this.userRefreshTokenRepository.create({
+    const token = await this.userRefreshTokenRepository.create({
       token_hash,
       expires_at: new Date(expires_at.toDate()),
-      user_id: userId
+      user_id: userId,
+      jti,
+      replaced_by_jti: oldJti || null
     })
 
     return {
-      tokens
+      token
     }
   }
 }

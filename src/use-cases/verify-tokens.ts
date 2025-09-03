@@ -2,23 +2,23 @@ import { UserRefreshTokenRepository } from '@/repositories/user-refresh-token-re
 import { UnauthorizedError } from './errors/unauthorized-error'
 
 interface VerifyTokensUseCaseRequest {
-  userId: string
+  jti: string
 }
 
 export class VerifyTokensUseCase {
   constructor(private userRefreshTokenRepository: UserRefreshTokenRepository) { }
 
   async execute({
-    userId
+    jti
   }: VerifyTokensUseCaseRequest) {
-    const tokens = await this.userRefreshTokenRepository.getByUserId(userId)
+    const token = await this.userRefreshTokenRepository.getByActiveJti(jti)
 
-    if (!tokens || tokens.length <= 0) {
+    if (!token) {
       throw new UnauthorizedError()
     }
 
     return {
-      tokens
+      token
     }
   }
 }

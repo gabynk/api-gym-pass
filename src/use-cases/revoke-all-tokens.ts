@@ -1,7 +1,7 @@
 import { UserRefreshTokenRepository } from '@/repositories/user-refresh-token-repository'
 import { UnauthorizedError } from './errors/unauthorized-error'
 import { UsersRepository } from '@/repositories/users-repository'
-import { UserRefreshToken } from '@prisma/client'
+import { User, UserRefreshToken } from '@prisma/client'
 
 interface RevokeTokensUseCaseRequest {
   actorId: string
@@ -28,11 +28,14 @@ export class RevokeTokensUseCase {
       throw new UnauthorizedError()
     }
 
-    const targetUser = await this.usersRepository.findById(targetUserId)
+    let targetUser: User | null = actorUser
+    if (actorUser.id !== targetUserId) {
+      targetUser = await this.usersRepository.findById(targetUserId)
+    }
 
     let tokens: UserRefreshToken[] = []
     if (targetUser) {
-      tokens = await this.userRefreshTokenRepository.revokingByUserId(targetUser.id, actorUser.id)
+      tokens = await this.userRefreshTokenRepository.revokingAllByUserId(targetUser.id, actorUser.id)
     }
 
     return {

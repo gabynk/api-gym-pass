@@ -58,11 +58,13 @@ model Gym {
 }
 
 model UserRefreshToken {
-  id         String    @id @default(uuid())
-  token_hash String
-  expires_at DateTime
-  revoked_at DateTime?
-  created_at DateTime  @default(now())
+  id              String    @id @default(uuid())
+  token_hash      String
+  jti             String    @unique
+  replaced_by_jti String?
+  expires_at      DateTime
+  revoked_at      DateTime?
+  created_at      DateTime  @default(now())
 
   user    User   @relation("UserRefreshTokens", fields: [user_id], references: [id])
   user_id String

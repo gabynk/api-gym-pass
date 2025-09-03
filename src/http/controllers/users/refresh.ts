@@ -1,21 +1,32 @@
+import { randomUUID } from 'node:crypto'
+import { FastifyReply, FastifyRequest } from 'fastify'
 import { UnauthorizedError } from '@/use-cases/errors/unauthorized-error'
 import { MakeCreateTokensUseCase } from '@/use-cases/factories/make-create-tokens-use-case'
 import { MakeVerifyTokensUseCase } from '@/use-cases/factories/make-verify-tokens-use-case'
-import { FastifyReply, FastifyRequest } from 'fastify'
+import { MakeRevokeTokenByJtiUseCase } from '@/use-cases/factories/make-revoke-token-by-jti-use-case'
 
 export async function refresh(request: FastifyRequest, reply: FastifyReply) {
   try {
     await request.jwtVerify({ onlyCookie: true })
 
-    const sub = request.user.sub
+    const { sub, jti } = request.user
 
     const verifyTokenUserCase = MakeVerifyTokensUseCase()
-
-    await verifyTokenUserCase.execute({
-      userId: sub,
+    const existToken = await verifyTokenUserCase.execute({
+      jti,
     })
 
-    const token = await reply.jwtSign({}, {
+    const revokeTokenByJtiUseCase = MakeRevokeTokenByJtiUseCase()
+    await revokeTokenByJtiUseCase.execute({
+      userId: sub,
+      jti,
+    })
+
+    const newJti = randomUUID()
+
+    const token = await reply.jwtSign({
+      jti: newJti
+    }, {
       sign: {
         sub,
         expiresIn: '10m',
@@ -23,7 +34,9 @@ export async function refresh(request: FastifyRequest, reply: FastifyReply) {
     },
     )
 
-    const refreshToken = await reply.jwtSign({}, {
+    const refreshToken = await reply.jwtSign({
+      jti: newJti
+    }, {
       sign: {
         sub,
         expiresIn: '7d',
@@ -32,10 +45,11 @@ export async function refresh(request: FastifyRequest, reply: FastifyReply) {
     )
 
     const createTokenUserCase = MakeCreateTokensUseCase()
-
     await createTokenUserCase.execute({
       refreshToken,
       userId: sub,
+      jti: newJti,
+      oldJti: existToken.token.jti
     })
 
     return reply

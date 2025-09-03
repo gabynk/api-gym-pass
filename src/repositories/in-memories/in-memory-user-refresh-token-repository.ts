@@ -14,11 +14,23 @@ export class InMemoryUserRefreshTokenRepository implements UserRefreshTokenRepos
       created_at: new Date(),
       user_id: data.user_id,
       revoked_by_id: null,
+      jti: data.jti,
+      replaced_by_jti: data.replaced_by_jti ?? null
     }
 
     this.items.push(token)
 
     return token
+  }
+
+  async getByActiveJti(jti: string) {
+    return this.items.find((item) => {
+      return item.jti === jti
+        && item.expires_at > new Date()
+        && item.revoked_by_id === null
+        && item.revoked_at === null
+        && item.replaced_by_jti === null
+    }) || null
   }
 
   async getByUserId(userId: string) {
@@ -27,10 +39,24 @@ export class InMemoryUserRefreshTokenRepository implements UserRefreshTokenRepos
         && item.expires_at > new Date()
         && item.revoked_by_id === null
         && item.revoked_at === null
+        && item.replaced_by_jti === null
     })
   }
 
-  async revokingByUserId(revokingUserId: string, revokedById: string) {
+  async revokingByJti(jti: string, userId: string) {
+    const tokenInIndex = this.items.findIndex((item) => item.jti === jti)
+    let token = null
+    if (tokenInIndex >= 0) {
+      this.items[tokenInIndex].revoked_at = new Date()
+      this.items[tokenInIndex].revoked_by_id = userId
+
+      token = this.items[tokenInIndex]
+    }
+
+    return token
+  }
+
+  async revokingAllByUserId(revokingUserId: string, revokedById: string) {
     const tokens = this.items.map((item) => {
       if (item.user_id === revokingUserId) {
         return {
