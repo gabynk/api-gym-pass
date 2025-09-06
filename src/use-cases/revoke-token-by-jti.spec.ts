@@ -25,7 +25,7 @@ describe('Revoke Token By Jti Use Case', () => {
       name: 'Member',
       email: 'member@example.com',
       password_hash: await hash('123456', 6),
-      role: 'MEMBER',
+      role: 'USER',
     })
     const createdToken = await createTokensUseCase.execute({
       refreshToken: 'token',

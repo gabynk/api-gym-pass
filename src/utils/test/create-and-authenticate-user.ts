@@ -15,7 +15,7 @@ export async function createAndAuthenticateUser(
       name,
       email,
       password_hash: await hash('123456', 6),
-      role: isAdmin ? 'ADMIN' : 'MEMBER',
+      role: isAdmin ? 'ADMIN' : 'USER',
     },
   })
 

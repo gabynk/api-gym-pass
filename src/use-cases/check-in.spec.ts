@@ -3,16 +3,22 @@ import { InMemoryCheckInsRepository } from '@/repositories/in-memories/in-memory
 import { CheckInUserCase } from './check-in'
 import { InMemoryGymsRepository } from '@/repositories/in-memories/in-memory-gyms-repository'
 import { Decimal } from '@prisma/client/runtime/library'
+import { InMemoryMembershipRepository } from '@/repositories/in-memories/in-memory-membership-repository'
+import { InMemoryUsersRepository } from '@/repositories/in-memories/in-memory-users-repository'
 
+let userRepository: InMemoryUsersRepository
 let checkInsRepository: InMemoryCheckInsRepository
 let gymsRepository: InMemoryGymsRepository
+let membershipRepository: InMemoryMembershipRepository
 let sut: CheckInUserCase
 
 describe('Check in Use Case', () => {
   beforeEach(async () => {
+    userRepository = new InMemoryUsersRepository()
     checkInsRepository = new InMemoryCheckInsRepository()
     gymsRepository = new InMemoryGymsRepository()
-    sut = new CheckInUserCase(checkInsRepository, gymsRepository)
+    membershipRepository = new InMemoryMembershipRepository()
+    sut = new CheckInUserCase(checkInsRepository, gymsRepository, membershipRepository)
 
     await gymsRepository.create({
       id: 'gym-id',
@@ -21,6 +27,28 @@ describe('Check in Use Case', () => {
       phone: null,
       latitude: -22.2147713,
       longitude: -49.9550626,
+      created_by_id: 'user-id'
+    })
+
+    await userRepository.items.push({
+      id: 'user-id',
+      name: 'user name',
+      email: 'user@test.com',
+      password_hash: 'passwordhash',
+      created_at: new Date(),
+      role: 'USER',
+      email_verified_at: new Date(),
+    })
+
+    await membershipRepository.items.push({
+      id: 'membership-id',
+      status: 'ACTIVE',
+      user_id: 'user-id',
+      gym_id: 'gym-id',
+      created_at: new Date(),
+      created_by_id: 'user-id-2',
+      left_at: null,
+      role: 'MEMBER'
     })
 
     vi.useFakeTimers()
@@ -91,6 +119,7 @@ describe('Check in Use Case', () => {
       phone: '',
       latitude: new Decimal(-22.2145721),
       longitude: new Decimal(-49.6668565),
+      created_by_id: 'user-id'
     })
 
     await expect(() =>

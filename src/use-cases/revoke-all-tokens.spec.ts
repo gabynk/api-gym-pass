@@ -24,7 +24,7 @@ describe('Revoke Token Use Case', () => {
   })
 
   it('Should be able to revoke other user tokens', async () => {
-    const revokedByUser = await userRepository.create({
+    const autorUser = await userRepository.create({
       name: 'Admim',
       email: 'admin@example.com',
       password_hash: await hash('123456', 6),
@@ -34,7 +34,7 @@ describe('Revoke Token Use Case', () => {
       name: 'Member',
       email: 'member@example.com',
       password_hash: await hash('123456', 6),
-      role: 'MEMBER',
+      role: 'USER',
     })
     await createTokensUseCase.execute({
       refreshToken: 'token',
@@ -42,17 +42,17 @@ describe('Revoke Token Use Case', () => {
       jti: randomUUID(),
     })
     const { tokens } = await sut.execute({
-      actorId: revokedByUser.id,
+      actorId: autorUser.id,
       targetUserId: revokingByUser.id
     })
 
     expect(tokens[0].user_id).toEqual(revokingByUser.id)
     expect(tokens[0].revoked_at).not.toEqual(null)
-    expect(tokens[0].revoked_by_id).toEqual(revokedByUser.id)
+    expect(tokens[0].revoked_by_id).toEqual(autorUser.id)
   })
 
   it('Should be able to revoke my tokens', async () => {
-    const revokedByUser = await userRepository.create({
+    const autorUser = await userRepository.create({
       name: 'Admim',
       email: 'admin@example.com',
       password_hash: await hash('123456', 6),
@@ -60,17 +60,17 @@ describe('Revoke Token Use Case', () => {
     })
     await createTokensUseCase.execute({
       refreshToken: 'token',
-      userId: revokedByUser.id,
+      userId: autorUser.id,
       jti: randomUUID(),
     })
     const { tokens } = await sut.execute({
-      actorId: revokedByUser.id,
-      targetUserId: revokedByUser.id
+      actorId: autorUser.id,
+      targetUserId: autorUser.id
     })
 
-    expect(tokens[0].user_id).toEqual(revokedByUser.id)
+    expect(tokens[0].user_id).toEqual(autorUser.id)
     expect(tokens[0].revoked_at).not.toEqual(null)
-    expect(tokens[0].revoked_by_id).toEqual(revokedByUser.id)
+    expect(tokens[0].revoked_by_id).toEqual(autorUser.id)
   })
 
   it('Should be able get error with nonexist request user', async () => {
@@ -89,7 +89,7 @@ describe('Revoke Token Use Case', () => {
       password: '123456',
     })
 
-    expect(user.role).toEqual('MEMBER')
+    expect(user.role).toEqual('USER')
 
     await expect(() =>
       sut.execute({

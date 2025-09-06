@@ -21,6 +21,7 @@ export async function create(request: FastifyRequest, reply: FastifyReply) {
   const createGymUseCase = MakeCreateGymsUseCase()
 
   await createGymUseCase.execute({
+    userId: request.user.sub,
     title,
     description,
     phone,

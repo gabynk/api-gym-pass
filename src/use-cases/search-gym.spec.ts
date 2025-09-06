@@ -18,6 +18,7 @@ describe('Search Gym Use Case', () => {
       phone: null,
       latitude: -22.2147713,
       longitude: -49.9550626,
+      created_by_id: 'user-id'
     })
     await gymsRepository.create({
       title: 'gym-2',
@@ -25,6 +26,7 @@ describe('Search Gym Use Case', () => {
       phone: null,
       latitude: -22.2147713,
       longitude: -49.9550626,
+      created_by_id: 'user-id'
     })
 
     const { gyms } = await sut.execute({
@@ -44,6 +46,7 @@ describe('Search Gym Use Case', () => {
         phone: null,
         latitude: -22.2147713,
         longitude: -49.9550626,
+        created_by_id: 'user-id'
       })
     }
 

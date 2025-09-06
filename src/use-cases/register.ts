@@ -14,7 +14,7 @@ interface RegisterUseCaseResponse {
 }
 
 export class RegisterUseCase {
-  constructor(private usersRepository: UsersRepository) {}
+  constructor(private usersRepository: UsersRepository) { }
 
   async execute({
     name,
@@ -33,6 +33,7 @@ export class RegisterUseCase {
       name,
       email,
       password_hash,
+      email_verified_at: new Date()
     })
 
     return {

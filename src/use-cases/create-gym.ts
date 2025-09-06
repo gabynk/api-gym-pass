@@ -2,6 +2,7 @@ import { Gym } from '@prisma/client'
 import { GymsRepository } from '@/repositories/gyms-repository'
 
 interface CreateGymUseCaseRequest {
+  userId: string
   title: string
   description: string | null
   phone: string | null
@@ -14,9 +15,10 @@ interface CreateGymUseCaseResponse {
 }
 
 export class CreateGymUseCase {
-  constructor(private gymsRepository: GymsRepository) {}
+  constructor(private gymsRepository: GymsRepository) { }
 
   async execute({
+    userId,
     title,
     description,
     phone,
@@ -29,6 +31,7 @@ export class CreateGymUseCase {
       phone,
       latitude,
       longitude,
+      created_by_id: userId,
     })
 
     return {

@@ -73,7 +73,7 @@ describe('Create tokens Use Case', () => {
       name: 'Member',
       email: 'member@example.com',
       password_hash: await hash('123456', 6),
-      role: 'MEMBER',
+      role: 'USER',
     })
     const targetToken = await createTokensUseCase.execute({
       refreshToken: 'token',

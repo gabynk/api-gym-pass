@@ -10,22 +10,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
+enum GlobalRole {
   ADMIN
+  USER
+}
+
+enum GymRole {
+  ADMIN
+  STAFF
   MEMBER
 }
 
+enum Status {
+  ACTIVE
+  INACTIVE
+  INVITED
+}
+
 model User {
-  id            String   @id @default(uuid())
-  name          String
-  email         String   @unique
-  password_hash String
-  role          Role     @default(MEMBER)
-  created_at    DateTime @default(now())
+  id                String     @id @default(uuid())
+  name              String
+  email             String     @unique
+  password_hash     String?
+  role              GlobalRole @default(USER)
+  created_at        DateTime   @default(now())
+  email_verified_at DateTime?
 
   checkIns             CheckIn[]
   refreshTokens        UserRefreshToken[] @relation("UserRefreshTokens")
   revokedRefreshTokens UserRefreshToken[] @relation("RefreshRevoker")
+  membershipUser       Membership[]       @relation("MembershipUser")
+  membershipCreatedBy  Membership[]       @relation("CreatedByUser")
+  gym                  Gym[]
 
   @@map("users")
 }
@@ -52,9 +68,33 @@ model Gym {
   latitude    Decimal
   longitude   Decimal
 
-  checkIns CheckIn[]
+  created_by    User   @relation(fields: [created_by_id], references: [id])
+  created_by_id String
+
+  checkIns   CheckIn[]
+  membership Membership[]
 
   @@map("gyms")
+}
+
+model Membership {
+  id         String    @id @default(uuid())
+  status     Status
+  role       GymRole   @default(MEMBER)
+  created_at DateTime  @default(now())
+  left_at    DateTime?
+
+  user    User   @relation("MembershipUser", fields: [user_id], references: [id])
+  user_id String
+
+  created_by    User   @relation("CreatedByUser", fields: [created_by_id], references: [id])
+  created_by_id String
+
+  gym    Gym    @relation(fields: [gym_id], references: [id])
+  gym_id String
+
+  @@unique([user_id, gym_id])
+  @@map("membership")
 }
 
 model UserRefreshToken {

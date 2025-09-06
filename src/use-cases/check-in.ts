@@ -3,6 +3,7 @@ import { CheckInsRepository } from '@/repositories/check-ins-repository'
 import { GymsRepository } from '@/repositories/gyms-repository'
 import { ResourceNotFoundError } from './errors/resource-not-found-error'
 import { getDistanceBetweenCoordinates } from '@/utils/get-distance-between-coordinate'
+import { MembershipRepository } from '@/repositories/membership-repository'
 
 interface CheckInUserCaseRequest {
   userId: string
@@ -19,7 +20,8 @@ export class CheckInUserCase {
   constructor(
     private checkInsRepository: CheckInsRepository,
     private gymsRepository: GymsRepository,
-  ) {}
+    private membershipRepository: MembershipRepository,
+  ) { }
 
   async execute({
     userId,
@@ -29,6 +31,11 @@ export class CheckInUserCase {
   }: CheckInUserCaseRequest): Promise<CheckInUserCaseResponse> {
     const gym = await this.gymsRepository.findById(gymId)
     if (!gym) {
+      throw new ResourceNotFoundError()
+    }
+
+    const membership = await this.membershipRepository.findByUserIdAndGymId(userId, gymId)
+    if (!membership || membership?.status !== 'ACTIVE') {
       throw new ResourceNotFoundError()
     }
 

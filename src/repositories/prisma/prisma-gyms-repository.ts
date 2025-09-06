@@ -33,7 +33,7 @@ export class PrismaGymsRepository implements GymsRepository {
     return gym
   }
 
-  async create(data: Prisma.GymCreateInput) {
+  async create(data: Prisma.GymUncheckedCreateInput) {
     const gym = await prisma.gym.create({
       data,
     })

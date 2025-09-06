@@ -3,6 +3,7 @@ import { RegisterUseCase } from './register'
 import { compare } from 'bcryptjs'
 import { InMemoryUsersRepository } from '@/repositories/in-memories/in-memory-users-repository'
 import { UserAlreadyExistsError } from './errors/user-already-exists-error'
+import dayjs from 'dayjs'
 
 let userRepository: InMemoryUsersRepository
 let registerUseCase: RegisterUseCase
@@ -21,6 +22,7 @@ describe('Register Use Case', () => {
     })
 
     expect(user.id).toEqual(expect.any(String))
+    expect(dayjs(user.email_verified_at).format('YYYY-mm-dd')).toEqual(dayjs(new Date()).format('YYYY-mm-dd'))
   })
 
   it('Should hash user password upon registration', async () => {
@@ -32,7 +34,7 @@ describe('Register Use Case', () => {
 
     const isPasswordCorrectlyHashed = await compare(
       '123456',
-      user.password_hash,
+      user?.password_hash || '',
     )
 
     expect(isPasswordCorrectlyHashed).toBe(true)

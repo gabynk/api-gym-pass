@@ -38,7 +38,7 @@ export class InMemoryGymsRepository implements GymsRepository {
     return gyms
   }
 
-  async create(data: Prisma.GymCreateInput) {
+  async create(data: Prisma.GymUncheckedCreateInput) {
     const gym = {
       id: data.id ?? randomUUID(),
       title: data.title,
@@ -47,6 +47,7 @@ export class InMemoryGymsRepository implements GymsRepository {
       latitude: new Prisma.Decimal(data.latitude.toString()),
       longitude: new Prisma.Decimal(data.longitude.toString()),
       created_at: new Date(),
+      created_by_id: data.created_by_id
     }
 
     this.items.push(gym)

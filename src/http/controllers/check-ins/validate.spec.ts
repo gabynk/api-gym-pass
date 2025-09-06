@@ -3,6 +3,7 @@ import request from 'supertest'
 import { app } from '@/app'
 import { createAndAuthenticateUser } from '@/utils/test/create-and-authenticate-user'
 import { prisma } from '@/lib/prisma'
+import { createGymAndMembership } from '@/utils/test/create-gym-and-membership'
 
 describe('Validate Check-in (e2e)', () => {
   beforeAll(async () => {
@@ -14,22 +15,17 @@ describe('Validate Check-in (e2e)', () => {
   })
 
   it('should be able to validate check-in', async () => {
-    const { token } = await createAndAuthenticateUser(app, true)
-
-    const user = await prisma.user.findFirstOrThrow()
-
-    const gym = await prisma.gym.create({
-      data: {
-        title: 'gym-test',
-        latitude: -22.2147713,
-        longitude: -49.9550626,
-      },
-    })
+    const { token, user: authUser } = await createAndAuthenticateUser(app, true)
+    const latlong = {
+      latitude: -22.2147713,
+      longitude: -49.9550626,
+    }
+    const { gym } = await createGymAndMembership({ app, token, userId: authUser.id, latlong })
 
     let checkIn = await prisma.checkIn.create({
       data: {
         gym_id: gym.id,
-        user_id: user.id,
+        user_id: authUser.id,
       },
     })
 
