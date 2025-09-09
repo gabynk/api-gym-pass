@@ -26,5 +26,6 @@ describe('Profile (e2e)', () => {
         email: user.email,
       }),
     )
+    expect(response.body.user).not.toHaveProperty('password_hash')
   })
 })
