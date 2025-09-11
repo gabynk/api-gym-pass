@@ -1,21 +1,16 @@
-import { Membership } from '@prisma/client'
+import { Status } from '@prisma/client'
 import { MembershipRepository } from '@/repositories/membership-repository'
 import { GymsRepository } from '@/repositories/gyms-repository'
 import { ResourceNotFoundError } from './errors/resource-not-found-error'
 import { UsersRepository } from '@/repositories/users-repository'
 
-interface CreateMembershipUseCaseRequest {
+interface ChangeUserMembershipStatusUseCaseRequest {
   userId: string
-  status: 'ACTIVE' | 'INACTIVE' | 'INVITED'
   gymId: string
-  createdById: string
+  status: Status
 }
 
-interface CreateMembershipUseCaseResponse {
-  membership: Membership
-}
-
-export class CreateMembershipUseCase {
+export class ChangeUserMembershipStatusUseCase {
   constructor(
     private usersRepository: UsersRepository,
     private gymsRepository: GymsRepository,
@@ -23,10 +18,9 @@ export class CreateMembershipUseCase {
 
   async execute({
     userId,
-    status,
     gymId,
-    createdById,
-  }: CreateMembershipUseCaseRequest): Promise<CreateMembershipUseCaseResponse> {
+    status
+  }: ChangeUserMembershipStatusUseCaseRequest) {
     const gym = await this.gymsRepository.findById(gymId)
     if (!gym) {
       throw new ResourceNotFoundError()
@@ -37,15 +31,6 @@ export class CreateMembershipUseCase {
       throw new ResourceNotFoundError()
     }
 
-    const membership = await this.membershipRepository.create({
-      status,
-      user_id: userId,
-      gym_id: gymId,
-      created_by_id: createdById,
-    })
-
-    return {
-      membership,
-    }
+    await this.membershipRepository.updateStatus(userId, gymId, status)
   }
 }

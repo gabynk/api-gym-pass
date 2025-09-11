@@ -1,4 +1,4 @@
-import { Membership, Prisma } from '@prisma/client'
+import { Membership, Prisma, Status } from '@prisma/client'
 import { MembershipRepository } from '../membership-repository'
 import { randomUUID } from 'node:crypto'
 
@@ -13,6 +13,13 @@ export class InMemoryMembershipRepository implements MembershipRepository {
     }
 
     return membership
+  }
+
+  async updateStatus(userId: string, gymId: string, status: Status) {
+    const membershipIndex = this.items.findIndex((item) => item.user_id === userId && item.gym_id === gymId)
+    if (membershipIndex >= 0) {
+      this.items[membershipIndex].status = status
+    }
   }
 
   async create(data: Prisma.MembershipUncheckedCreateInput) {
