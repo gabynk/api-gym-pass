@@ -1,4 +1,4 @@
-import { Prisma, User } from '@prisma/client'
+import { GymRole, Prisma, Status, User } from '@prisma/client'
 import { UsersRepository } from '../users-repository'
 import { randomUUID } from 'node:crypto'
 
@@ -23,6 +23,35 @@ export class InMemoryUsersRepository implements UsersRepository {
     }
 
     return user
+  }
+
+  async findByUserIdAndGymIdWithMembership(id: string, gym_id: string) {
+    const user = this.items.find((user) => user.id === id)
+
+    if (!user) {
+      return null
+    }
+
+    if (id === 'user-id-with-membership') {
+      return {
+        ...user,
+        membershipUser: [{
+          id: 'membership-id',
+          status: Status.ACTIVE,
+          user_id: 'user-id',
+          gym_id,
+          created_at: new Date(),
+          created_by_id: 'user-id',
+          left_at: null,
+          role: GymRole.MEMBER,
+        }]
+      }
+    }
+
+    return {
+      ...user,
+      membershipUser: []
+    }
   }
 
   async create(data: Prisma.UserCreateInput) {

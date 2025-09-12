@@ -23,6 +23,25 @@ export class PrismaUsersRepository implements UsersRepository {
     return user
   }
 
+  async findByUserIdAndGymIdWithMembership(user_id: string, gym_id: string) {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: user_id,
+      },
+      include: {
+        membershipUser: {
+          where: {
+            gym_id
+          }
+        }
+
+      }
+
+    })
+
+    return user
+  }
+
   async create(data: Prisma.UserCreateInput) {
     const user = await prisma.user.create({
       data,
