@@ -26,8 +26,9 @@ export class ChangeUserMembershipStatusUseCase {
       throw new ResourceNotFoundError()
     }
 
-    const user = await this.usersRepository.findById(userId)
-    if (!user) {
+    const user = await this.usersRepository.findByUserIdAndGymIdWithMembership(userId, gymId)
+
+    if (!user || !user.membershipUser.length) {
       throw new ResourceNotFoundError()
     }
 

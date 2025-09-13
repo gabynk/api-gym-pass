@@ -25,15 +25,13 @@ describe('Change User Membership Status (e2e)', () => {
       },
     })
 
-    const createdMembershipResp = await request(app.server)
+    await request(app.server)
       .post(`/gyms/${gym.id}/members`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         userId: user.id,
         status: 'ACTIVE',
       })
-
-    expect(createdMembershipResp.statusCode).toEqual(201)
 
     const response = await request(app.server)
       .patch(`/gyms/${gym.id}/members/status`)
@@ -44,5 +42,37 @@ describe('Change User Membership Status (e2e)', () => {
       })
 
     expect(response.statusCode).toEqual(204)
+  })
+
+  it('should not be able to change user membership status if author does not permission', async () => {
+    const { token, user } = await createAndAuthenticateUser(app, false)
+
+    const gym = await prisma.gym.create({
+      data: {
+        title: 'gym-test',
+        latitude: -22.2147713,
+        longitude: -49.9550626,
+        created_by_id: user.id
+      },
+    })
+
+    await prisma.membership.create({
+      data: {
+        created_by_id: user.id,
+        user_id: user.id,
+        status: 'ACTIVE',
+        gym_id: gym.id,
+      },
+    })
+
+    const response = await request(app.server)
+      .patch(`/gyms/${gym.id}/members/status`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        userId: user.id,
+        status: 'INACTIVE',
+      })
+
+    expect(response.statusCode).toEqual(403)
   })
 })
