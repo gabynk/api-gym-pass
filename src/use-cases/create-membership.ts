@@ -39,8 +39,8 @@ export class CreateMembershipUseCase {
 
     const membership = await this.membershipRepository.create({
       status,
-      user_id: userId,
-      gym_id: gymId,
+      user_id: user.id,
+      gym_id: gym.id,
       created_by_id: createdById,
     })
 

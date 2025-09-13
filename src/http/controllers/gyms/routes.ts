@@ -12,7 +12,7 @@ import { verifyIsValidUserToUpdateGym } from '@/http/middlewares/verify-user-rol
 export async function gymsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', verifyJWT)
 
-  app.post('/gyms/:gymId/members', createMembership)
+  app.post('/gyms/:gymId/members', { onRequest: [verifyIsValidUserToUpdateGym()] }, createMembership)
   app.patch('/gyms/:gymId/members/status', { onRequest: [verifyIsValidUserToUpdateGym()] }, changeUserStatus)
   app.get('/gyms/search', search)
   app.get('/gyms/nearby', nearby)
