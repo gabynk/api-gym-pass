@@ -20,7 +20,7 @@ describe('Validate Check-in (e2e)', () => {
       latitude: -22.2147713,
       longitude: -49.9550626,
     }
-    const { gym } = await createGymAndMembership({ app, token, userId: authUser.id, latlong })
+    const { gym } = await createGymAndMembership({ userId: authUser.id, latlong })
 
     let checkIn = await prisma.checkIn.create({
       data: {

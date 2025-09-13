@@ -1,10 +1,6 @@
 import { prisma } from '@/lib/prisma'
-import { FastifyInstance } from 'fastify'
-import request from 'supertest'
 
 interface createGymAndMembershipProps {
-  app: FastifyInstance,
-  token: string,
   userId: string,
   status?: "ACTIVE" | "INACTIVE" | "INVITED",
   latlong?: {
@@ -14,8 +10,6 @@ interface createGymAndMembershipProps {
 }
 
 export async function createGymAndMembership({
-  app,
-  token,
   userId,
   status = 'ACTIVE',
   latlong = {
@@ -32,15 +26,17 @@ export async function createGymAndMembership({
     },
   })
 
-  await request(app.server)
-    .post(`/gyms/${gym.id}/members`)
-    .set('Authorization', `Bearer ${token}`)
-    .send({
-      userId: userId,
-      status
-    })
+  const membership = await prisma.membership.create({
+    data: {
+      status,
+      user_id: userId,
+      gym_id: gym.id,
+      created_by_id: userId,
+    },
+  })
 
   return {
     gym,
+    membership,
   }
 }
