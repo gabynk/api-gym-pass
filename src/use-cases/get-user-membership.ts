@@ -1,6 +1,5 @@
 import { ResourceNotFoundError } from './errors/resource-not-found-error'
-import { PrismaMembershipRepository } from '@/repositories/prisma/prisma-membership-repository'
-import { IMembershipWithUserDTO } from '@/dto/IMembershipWithUserDTO'
+import { IUserWithMembershipDTO } from '@/dto/i-membership-with-user-dto'
 import { PrismaUsersRepository } from '@/repositories/prisma/prisma-users-repository'
 
 interface GetUserMembershipCaseRequest {
@@ -9,7 +8,7 @@ interface GetUserMembershipCaseRequest {
 }
 
 interface GetUserMembershipCaseResponse {
-  userMembership: IMembershipWithUserDTO
+  userMembership: IUserWithMembershipDTO
 }
 
 export class GetUserMembershipUserCase {

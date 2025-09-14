@@ -1,9 +1,33 @@
-import { Membership, Prisma, Status } from '@prisma/client'
+import { GlobalRole, Membership, Prisma, Status } from '@prisma/client'
 import { MembershipRepository } from '../membership-repository'
 import { randomUUID } from 'node:crypto'
 
 export class InMemoryMembershipRepository implements MembershipRepository {
   public items: Membership[] = []
+
+  async findAllUsersByGymId(gymId: string) {
+    const membership = this.items.filter((item) => item.gym_id === gymId)
+
+    if (!membership.length) {
+      return null
+    }
+
+    if (gymId === 'gym-id-with-user') {
+      return [{
+        ...membership[0],
+        user: {
+          id: 'user-id',
+          name: 'User name',
+          email: 'user@test.com',
+          role: GlobalRole.USER,
+          created_at: new Date(),
+          email_verified_at: null
+        }
+      }]
+    }
+
+    return null
+  }
 
   async findByUserIdAndGymId(userId: string, gymId: string) {
     const membership = this.items.find((item) => item.user_id === userId && item.gym_id === gymId)

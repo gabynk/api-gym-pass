@@ -8,13 +8,16 @@ import { verifyUserRole } from '@/http/middlewares/verify-user-role'
 import { createMembership } from './create-membership'
 import { changeUserStatus } from './change-user-status'
 import { verifyIsValidUserToUpdateGym } from '@/http/middlewares/verify-user-role-and-status'
+import { getAllGymMembership } from './get-all-gym-membership'
 
 export async function gymsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', verifyJWT)
 
-  app.post('/gyms/:gymId/members', { onRequest: [verifyIsValidUserToUpdateGym()] }, createMembership)
-  app.patch('/gyms/:gymId/members/status', { onRequest: [verifyIsValidUserToUpdateGym()] }, changeUserStatus)
   app.get('/gyms/search', search)
   app.get('/gyms/nearby', nearby)
   app.post('/gyms', { onRequest: [verifyUserRole('ADMIN')] }, create)
+
+  app.get('/gyms/:gymId/members', { onRequest: [verifyIsValidUserToUpdateGym()] }, getAllGymMembership)
+  app.post('/gyms/:gymId/members', { onRequest: [verifyIsValidUserToUpdateGym()] }, createMembership)
+  app.patch('/gyms/:gymId/members/status', { onRequest: [verifyIsValidUserToUpdateGym()] }, changeUserStatus)
 }
