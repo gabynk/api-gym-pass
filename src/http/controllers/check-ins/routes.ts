@@ -6,6 +6,8 @@ import { validate } from './validate'
 import { history } from './history'
 import { metrics } from './metrics'
 import { verifyUserRole } from '@/http/middlewares/verify-user-role'
+import { verifyIsValidUserToUpdateGym } from '@/http/middlewares/verify-user-role-and-status'
+import { gymHistory } from './gym-history'
 
 export async function checkInsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', verifyJWT)
@@ -14,6 +16,7 @@ export async function checkInsRoutes(app: FastifyInstance) {
   app.get('/check-ins/metrics', metrics)
 
   app.post('/gyms/:gymId/check-ins', create)
+  app.get('/gyms/:gymId/check-ins/history', { onRequest: [verifyIsValidUserToUpdateGym()] }, gymHistory)
 
   app.patch(
     '/check-ins/:checkInId/validate',

@@ -26,6 +26,29 @@ export class PrismaCheckInsRepository implements CheckInsRepository {
     return checkIns
   }
 
+  async findManyByGymId(gym_id: string, page: number) {
+    const checkIns = await prisma.checkIn.findMany({
+      where: {
+        gym_id,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            created_at: true,
+            email_verified_at: true,
+          }
+        }
+      },
+      take: 20,
+      skip: (page - 1) * 20,
+    })
+
+    return checkIns
+  }
+
   async findByUserIdOnDate(userId: string, date: Date) {
     const startOfTheDay = dayjs(date).startOf('date')
     const endOfTheDay = dayjs(date).endOf('date')

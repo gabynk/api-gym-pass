@@ -1,4 +1,4 @@
-import { Prisma, CheckIn } from '@prisma/client'
+import { Prisma, CheckIn, GlobalRole } from '@prisma/client'
 import { CheckInsRepository } from '@/repositories/check-ins-repository'
 import { randomUUID } from 'node:crypto'
 import dayjs from 'dayjs'
@@ -14,6 +14,30 @@ export class InMemoryCheckInsRepository implements CheckInsRepository {
     return this.items
       .filter((item) => item.user_id === userId)
       .slice((page - 1) * 20, page * 20)
+  }
+
+  async findManyByGymId(gymId: string, page: number) {
+    const checkIn = this.items
+      .filter((item) => item.gym_id === gymId)
+      .slice((page - 1) * 20, page * 20)
+
+    if (gymId === 'gym-id-with-user') {
+      return checkIn.map(item => {
+        return {
+          ...item,
+          user: {
+            id: 'user-id',
+            name: 'User name',
+            email: 'user@test.com',
+            role: GlobalRole.USER,
+            created_at: new Date(),
+            email_verified_at: null
+          }
+        }
+      })
+    }
+
+    return checkIn
   }
 
   async findByUserIdOnDate(userId: string, date: Date) {

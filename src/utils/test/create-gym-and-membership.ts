@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { GymRole } from '@prisma/client'
 
 interface createGymAndMembershipProps {
   userId: string,
@@ -6,7 +7,8 @@ interface createGymAndMembershipProps {
   latlong?: {
     latitude: number,
     longitude: number,
-  }
+  },
+  role?: GymRole
 }
 
 export async function createGymAndMembership({
@@ -15,7 +17,8 @@ export async function createGymAndMembership({
   latlong = {
     latitude: -22.220367,
     longitude: -49.9489532,
-  }
+  },
+  role = 'MEMBER'
 }: createGymAndMembershipProps) {
   const gym = await prisma.gym.create({
     data: {
@@ -32,6 +35,7 @@ export async function createGymAndMembership({
       user_id: userId,
       gym_id: gym.id,
       created_by_id: userId,
+      role,
     },
   })
 
