@@ -9,13 +9,17 @@ import { createMembership } from './create-membership'
 import { changeUserStatus } from './change-user-status'
 import { verifyIsValidUserToUpdateGym } from '@/http/middlewares/verify-user-role-and-status'
 import { getAllGymMembership } from './get-all-gym-membership'
+import { getProfile } from './get-profile'
 
 export async function gymsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', verifyJWT)
 
   app.get('/gyms/search', search)
   app.get('/gyms/nearby', nearby)
+
   app.post('/gyms', { onRequest: [verifyUserRole('ADMIN')] }, create)
+
+  app.get('/gym/:gymId', getProfile)
 
   app.get('/gyms/:gymId/members', { onRequest: [verifyIsValidUserToUpdateGym()] }, getAllGymMembership)
   app.post('/gyms/:gymId/members', { onRequest: [verifyIsValidUserToUpdateGym()] }, createMembership)
