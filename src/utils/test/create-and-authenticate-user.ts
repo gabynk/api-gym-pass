@@ -16,6 +16,7 @@ export async function createAndAuthenticateUser(
       email,
       password_hash: await hash('123456', 6),
       role: isAdmin ? 'ADMIN' : 'USER',
+      email_verified_at: new Date()
     },
   })
 
