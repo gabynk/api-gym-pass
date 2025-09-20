@@ -54,6 +54,19 @@ export class InMemoryUsersRepository implements UsersRepository {
     }
   }
 
+  async updatePassword(userId: string, password_hash: string) {
+    const userIndex = this.items.findIndex(item => item.id === userId)
+
+    let user = null
+    if (userIndex >= 0) {
+      this.items[userIndex].password_hash = password_hash
+      this.items[userIndex].email_verified_at = new Date()
+      user = this.items[userIndex]
+    }
+
+    return user
+  }
+
   async create(data: Prisma.UserCreateInput) {
     const user = {
       id: randomUUID(),
