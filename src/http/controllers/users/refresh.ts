@@ -14,6 +14,7 @@ export async function refresh(request: FastifyRequest, reply: FastifyReply) {
     const verifyTokenUserCase = MakeVerifyTokensUseCase()
     const existToken = await verifyTokenUserCase.execute({
       jti,
+      userId: sub
     })
 
     const revokeTokenByJtiUseCase = MakeRevokeTokenByJtiUseCase()

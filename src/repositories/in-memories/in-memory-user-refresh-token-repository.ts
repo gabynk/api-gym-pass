@@ -23,13 +23,14 @@ export class InMemoryUserRefreshTokenRepository implements UserRefreshTokenRepos
     return token
   }
 
-  async getByActiveJti(jti: string) {
+  async getByActiveJtiAndUserId(jti: string, userId: string) {
     return this.items.find((item) => {
       return item.jti === jti
         && item.expires_at > new Date()
         && item.revoked_by_id === null
         && item.revoked_at === null
         && item.replaced_by_jti === null
+        && item.user_id === userId
     }) || null
   }
 

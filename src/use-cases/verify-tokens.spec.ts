@@ -33,11 +33,12 @@ describe('Create tokens Use Case', () => {
   it('Should be able to get valid tokens', async () => {
     const createdTokens = await createTokensUseCase.execute({
       refreshToken: 'token',
-      userId: '123456',
+      userId: 'user-id',
       jti: randomUUID(),
     })
     const { token } = await sut.execute({
       jti: createdTokens.token.jti,
+      userId: 'user-id',
     })
 
     expect(token.id).toEqual(expect.any(String))
@@ -48,7 +49,7 @@ describe('Create tokens Use Case', () => {
   it('Should be able to error with expired token', async () => {
     const createdTokens = await createTokensUseCase.execute({
       refreshToken: 'token',
-      userId: '123456',
+      userId: 'user-id',
       jti: randomUUID(),
     })
 
@@ -58,6 +59,7 @@ describe('Create tokens Use Case', () => {
     await expect(() =>
       sut.execute({
         jti: createdTokens.token.jti,
+        userId: 'user-id',
       }),
     ).rejects.toBeInstanceOf(UnauthorizedError)
   })
@@ -87,7 +89,7 @@ describe('Create tokens Use Case', () => {
 
     expect(tokens[0].revoked_at).not.toEqual(null)
     await expect(
-      sut.execute({ jti: targetToken.token.jti }),
+      sut.execute({ jti: targetToken.token.jti, userId: targetUser.id, }),
     ).rejects.toBeInstanceOf(UnauthorizedError)
   })
 })

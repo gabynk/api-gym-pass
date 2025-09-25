@@ -5,6 +5,7 @@ import { UserAlreadyExistsError } from '@/use-cases/errors/user-already-exists-e
 import { MakeCreateTokensUseCase } from '@/use-cases/factories/make-create-tokens-use-case'
 import { MakeRegisterUserByGymUseCase } from '@/use-cases/factories/make-register-user-by-gym-use-case'
 import { MakeSendInviteAccessEmailUseCase } from '@/use-cases/factories/make-send-invite-access-email-use-case'
+import dayjs from 'dayjs'
 
 export async function registerAndSendEmail(request: FastifyRequest, reply: FastifyReply) {
   const createMembershipParamsSchema = z.object({
@@ -27,13 +28,26 @@ export async function registerAndSendEmail(request: FastifyRequest, reply: Fasti
       authorId: request.user.sub,
     })
 
-    const token = randomUUID()
+    const jti = randomUUID()
+    const token = await reply.jwtSign({
+      jti,
+      gid: gymId
+    }, {
+      sign: {
+        sub: createdUser.user.id,
+        expiresIn: '10m',
+      },
+    },
+    )
+
+    const expiresAt = dayjs().add(10, 'minute')
 
     const createTokenUserCase = MakeCreateTokensUseCase()
     await createTokenUserCase.execute({
       refreshToken: token,
       userId: createdUser.user.id,
-      jti: randomUUID(),
+      jti,
+      expiresAt: expiresAt.toDate()
     })
 
     const sendInviteAccessEmailUseCase = MakeSendInviteAccessEmailUseCase()

@@ -9,6 +9,7 @@ import { profile } from './profile'
 import { refresh } from './refresh'
 import { logout } from './logout'
 import { registerAndSendEmail } from './register-and-send-email'
+import { resetPassword } from './reset-password'
 
 export async function usersRoutes(app: FastifyInstance) {
   app.post('/users', register)
@@ -16,6 +17,7 @@ export async function usersRoutes(app: FastifyInstance) {
 
   app.patch('/token/refresh', refresh)
   app.post('/logout', logout)
+  app.post('/reset-password', resetPassword)
 
   app.get('/me', { onRequest: [verifyJWT] }, profile)
 

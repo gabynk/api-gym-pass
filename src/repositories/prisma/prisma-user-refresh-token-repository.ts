@@ -11,7 +11,7 @@ export class PrismaUserRefreshTokenRepository implements UserRefreshTokenReposit
     return token
   }
 
-  async getByActiveJti(jti: string) {
+  async getByActiveJtiAndUserId(jti: string, userId: string) {
     const token = await prisma.userRefreshToken.findUnique({
       where: {
         jti,
@@ -19,7 +19,8 @@ export class PrismaUserRefreshTokenRepository implements UserRefreshTokenReposit
           gte: new Date()
         },
         revoked_at: null,
-        revoked_by_id: null
+        revoked_by_id: null,
+        user_id: userId
       }
     })
 

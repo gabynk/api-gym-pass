@@ -5,11 +5,12 @@ export async function verifyJWT(request: FastifyRequest, reply: FastifyReply) {
   try {
     await request.jwtVerify()
 
-    const { jti } = request.user
+    const { jti, sub } = request.user
 
     const verifyTokenUserCase = MakeVerifyTokensUseCase()
     await verifyTokenUserCase.execute({
       jti,
+      userId: sub
     })
 
   } catch (err) {
