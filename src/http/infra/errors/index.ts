@@ -1,6 +1,7 @@
-import { env } from "@/env";
 import { FastifyError, FastifyReply, FastifyRequest } from "fastify";
 import { ZodError } from "zod";
+import { env } from "@/env";
+import { Sentry } from "@/lib/sentry";
 import { STATUS_BY_ERROR_NAME } from "./status-by-error-name";
 
 export function errorHandler(error: FastifyError, request: FastifyRequest, reply: FastifyReply) {
@@ -14,7 +15,7 @@ export function errorHandler(error: FastifyError, request: FastifyRequest, reply
   if (env.NODE_ENV !== 'production') {
     console.error('ERROR: ', error)
   } else {
-    // TODO: Here we should log to an external tool like DataDog/NewRelic/Sentry
+    Sentry.captureException(error)
   }
 
   const name = (error as any).name ?? error.constructor?.name ?? 'Error'
