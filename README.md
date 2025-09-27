@@ -1,7 +1,7 @@
 # GymPass style app
 
 Aplicação backend inspirada no modelo GymPass, com foco em autenticação, controle de academias e check-ins de usuários.
-Este projeto foi desenvolvido para praticar Node.js, Fastify, JWT, autenticação, banco de dados relacional (PostgreSQL) e boas práticas de arquitetura.
+Este projeto foi desenvolvido para praticar Node.js, Fastify, JWT, autenticação, banco de dados relacional (PostgreSQL) e SOLID.
 
 ## Sobre o Projeto
 
@@ -12,6 +12,7 @@ Além do conteúdo ensinado no curso, foram feitas adaptações e melhorias pró
 - Gestão de membros (ativar/inativar, listar, buscar dados da academia)
 - Logout com refresh token invalidável
 - Regras adicionais de negócio para reforçar a segurança e consistência do sistema
+- Integração de monitoramento de erros com o Sentry
 
 Esse mix entre aprendizado guiado e customizações pessoais foi pensado para aprofundar conceitos de arquitetura limpa, autenticação, segurança e regras de domínio.
 
@@ -25,6 +26,7 @@ Esse mix entre aprendizado guiado e customizações pessoais foi pensado para ap
 - Docker
 - JWT (JSON Web Token)
 - Vitest / Supertest (para testes)
+- Sentry (monitoramento e rastreamento de erros)
 
 ## RFs (Requisitos funcionais)
 
